@@ -1,4 +1,6 @@
-
+html {
+    background-color: #0D1F22;
+}
 .board {
         display: flex;
         flex-direction: column;
@@ -12,16 +14,16 @@
         width: 20px;
         height: 20px;
         border-radius: 50%;
-        background-color: rgb(128, 128, 128);
+        background-color: #1A4C55;
         margin: 2px;
     }
 
 .player1 {
-    background-color: springgreen;
+    background-color: #F7ACCF;
 }
 
 .player2 {
-    background-color: indianred;
+    background-color: #45F0DF;
 }
 
 .empty {
