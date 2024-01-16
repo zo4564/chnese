@@ -1,0 +1,38 @@
+
+.board {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        }
+.row {
+        display: flex;
+        justify-content: center;
+    }
+.hole {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background-color: rgb(128, 128, 128);
+        margin: 2px;
+    }
+
+.player1 {
+    background-color: springgreen;
+}
+
+.player2 {
+    background-color: indianred;
+}
+
+.empty {
+        visibility: hidden;
+    }
+
+.void {
+        width: 3px;
+        height: 10px;
+    }
+
+#magicButton {
+        color: green;
+    }

@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Chinese Checkers</title>
+     <link rel="stylesheet" href="static/style.css">
+</head>
+<body>
+<div class="board">
+    {% for row in board %}
+        <div class="row" y="{{ loop.index - 1}}">
+            {% set outer_loop = loop %}
+            {% for cell in row %}
+                <div class="hole {{ 'empty' if cell == -1 else ('player1' if cell == 1 else ('player2' if cell == 2 else '')) }}"
+                     x="{{ loop.index - 1 if cell == 0 or cell == 1 or cell == 2 else 'null' }}"
+                     y="{{ outer_loop.index - 1 if cell == 0 or cell == 1 or cell == 2 else 'null'}}"
+                     style=""
+                     onclick="holeClicked(this)"></div>
+                <div class="void"></div>
+            {% endfor %}
+        </div>
+    {% endfor %}
+</div>
+
+<button id="magicButton">shift</button>
+</body>
+
+<script>
+    const evenDivs = document.querySelectorAll('[y]:nth-child(odd)');
+    const holes = document.querySelectorAll('.hole');
+    const magicButton = document.getElementById('magicButton');
+    let divsShifted = false;
+    let selectedElement = null;
+    let possibleMoves = [];
+
+
+    magicButton.addEventListener('click', function () {
+
+        if (!divsShifted) {
+            evenDivs.forEach(function (div) {
+                div.insertAdjacentHTML('afterbegin', '<div class="hole empty"></div> <div class="void"></div>')
+            })
+            divsShifted = true;
+            magicButton.innerText = 'unshift';
+            magicButton.style.color = 'red';
+        }
+        else {
+            evenDivs.forEach(function (div) {
+                div.innerHTML = div.innerHTML.replace('<div class="hole empty"></div> <div class="void"></div>', '');
+            })
+
+            divsShifted = false;
+            magicButton.innerText = 'shift';
+            magicButton.style.color = '';
+        }
+        });
+ function holeClicked(element)
+    {
+        let x = parseInt(element.getAttribute('x'));
+        let y = parseInt(element.getAttribute('y'));
+
+        console.log(x);
+        console.log(y);
+
+        if (selectedElement) {
+            selectedElement.style.border = '';
+            selectedElement.style.boxSizing = '';
+        }
+
+        selectedElement = element;
+        selectedElement.style.border = "solid";
+        selectedElement.style.boxSizing = "border-box"
+
+        possibleMoves.forEach(function (div) {
+                div.style.backgroundColor = '';
+            })
+        possibleMoves = [];
+
+        const directions = [
+            [-1, 0], [0, -1], [0, 1], [1, 0]
+        ]
+        if (y % 2 === 0) {
+            directions.push([-1, -1]);
+            directions.push([-1, 1]);
+        }
+        else {
+            directions.push([1, -1]);
+            directions.push([1, 1]);
+
+        }
+
+        directions.forEach(function (direction) {
+
+            const searchedCoords = [x - direction[0], y - direction[1]];
+            const searchedSquare = document.querySelectorAll(`[x="${searchedCoords[0]}"][y="${searchedCoords[1]}"]`).item(0);
+
+            if (searchedSquare) {
+                if (!(searchedSquare.classList.contains('player1') || searchedSquare.classList.contains('player2'))) {
+                    possibleMoves.push(searchedSquare);
+                    searchedSquare.style.backgroundColor = "slateblue";
+                }
+            }
+            else {
+                console.log("[debug] square (" + searchedCoords[0] + ", " + searchedCoords[1] + ") doesn't exist")
+            }
+        })
+
+    }
+
+
+</script>
+</html>
