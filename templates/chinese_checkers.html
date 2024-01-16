@@ -5,6 +5,7 @@
      <link rel="stylesheet" href="static/style.css">
 </head>
 <body>
+<button id="magicButton"> > </button>
 <div class="board">
     {% for row in board %}
         <div class="row" y="{{ loop.index - 1}}">
@@ -20,61 +21,65 @@
         </div>
     {% endfor %}
 </div>
+<div id="controls">
+    <div class="button" id="playerMarker"></div>
+    <div class="button" id="endTurnButton"> <img src="static/media/arrow.png" alt="end turn" width = "32" height = "32"> </div>
+</div>
 
-<button id="magicButton">shift</button>
+
 </body>
 
 <script>
     const evenDivs = document.querySelectorAll('[y]:nth-child(odd)');
-    const holes = document.querySelectorAll('.hole');
     const magicButton = document.getElementById('magicButton');
+    const endTurnButton = document.getElementById('endTurnButton');
+    const currentPlayerMarker = document.getElementById('playerMarker');
     let divsShifted = false;
     let selectedElement = null;
     let possibleMoves = [];
+    let currentPlayer = 1;
+    shiftDivs();
+    magicButton.addEventListener('click', shiftDivs);
+    endTurnButton.addEventListener('click', endTurn);
+    function shiftDivs() {
+            if (!divsShifted) {
+                evenDivs.forEach(function (div) {
+                    div.insertAdjacentHTML('afterbegin', '<div class="hole empty"></div> <div class="void"></div>');
+                });
+                divsShifted = true;
+                magicButton.innerText = ' < ';
+            } else {
+                evenDivs.forEach(function (div) {
+                    div.innerHTML = div.innerHTML.replace('<div class="hole empty"></div> <div class="void"></div>', '');
+                });
 
-
-    magicButton.addEventListener('click', function () {
-
-        if (!divsShifted) {
-            evenDivs.forEach(function (div) {
-                div.insertAdjacentHTML('afterbegin', '<div class="hole empty"></div> <div class="void"></div>')
-            })
-            divsShifted = true;
-            magicButton.innerText = 'unshift';
-            magicButton.style.color = 'red';
+                divsShifted = false;
+                magicButton.innerText = ' > ';
+            }
         }
-        else {
-            evenDivs.forEach(function (div) {
-                div.innerHTML = div.innerHTML.replace('<div class="hole empty"></div> <div class="void"></div>', '');
-            })
-
-            divsShifted = false;
-            magicButton.innerText = 'shift';
-            magicButton.style.color = '';
-        }
-        });
- function holeClicked(element)
+    function highlightHole(element)
     {
-        let x = parseInt(element.getAttribute('x'));
-        let y = parseInt(element.getAttribute('y'));
-
-        console.log(x);
-        console.log(y);
-
         if (selectedElement) {
             selectedElement.style.border = '';
             selectedElement.style.boxSizing = '';
-        }
+            }
 
         selectedElement = element;
         selectedElement.style.border = "solid white";
         selectedElement.style.boxSizing = "border-box"
-
+        }
+    function clearHighlightedMoves()
+    {
         possibleMoves.forEach(function (div) {
                 div.style.border = '';
                 div.style.boxSizing = '';
             })
         possibleMoves = [];
+    }
+    function findPossibleMoves(element)
+    {
+        let x = parseInt(element.getAttribute('x'));
+        let y = parseInt(element.getAttribute('y'));
 
         const directions = [
             [-1, 0], [0, -1], [0, 1], [1, 0]
@@ -86,7 +91,6 @@
         else {
             directions.push([1, -1]);
             directions.push([1, 1]);
-
         }
 
         directions.forEach(function (direction) {
@@ -99,11 +103,11 @@
                     possibleMoves.push(searchedSquare);
                     searchedSquare.style.border = "solid #578A93";
                     searchedSquare.style.boxSizing = "border-box"
-
                 }
                 else {
                     let nextCoords = [x - (2 * direction[0]), y - (2 * direction[1])];
                     let nextSquare = document.querySelectorAll(`[x="${nextCoords[0]}"][y="${nextCoords[1]}"]`).item(0);
+
                     if (nextSquare)
                     {
                         if(nextCoords[1] % 2 === 0)
@@ -119,19 +123,36 @@
                                 nextSquare.style.border = "solid #578A93";
                                 nextSquare.style.boxSizing = "border-box";
                             }
-
                         }
                     }
                 }
-
             }
             else {
                 console.log("[debug] square (" + searchedCoords[0] + ", " + searchedCoords[1] + ") doesn't exist")
             }
         })
-
     }
-
-
+    function endTurn()
+    {
+        if(currentPlayer === 1)
+        {
+            currentPlayer = 2;
+            currentPlayerMarker.style.backgroundColor = '#45F0DF';
+        }
+        else
+        {
+            currentPlayer = 1;
+            currentPlayerMarker.style.backgroundColor = '#F7ACCF';
+        }
+    }
+    function holeClicked(element)
+    {
+        if((currentPlayer === 1 && element.classList.contains('player1')) || (currentPlayer === 2 && element.classList.contains('player2')))
+        {
+            highlightHole(element);
+            clearHighlightedMoves();
+            findPossibleMoves(element);
+        }
+    }
 </script>
 </html>
