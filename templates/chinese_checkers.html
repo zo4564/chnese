@@ -36,8 +36,10 @@
     const currentPlayerMarker = document.getElementById('playerMarker');
     let divsShifted = false;
     let selectedElement = null;
+    let previousElement = null;
     let possibleMoves = [];
-    let currentPlayer = 1;
+    let jumpMoves = [];
+    let currentPlayer = 'player1';
     shiftDivs();
     magicButton.addEventListener('click', shiftDivs);
     endTurnButton.addEventListener('click', endTurn);
@@ -75,11 +77,14 @@
                 div.style.boxSizing = '';
             })
         possibleMoves = [];
+        jumpMoves.forEach(function (div) {
+                div.style.border = '';
+                div.style.boxSizing = '';
+            })
+        jumpMoves = [];
     }
-    function findPossibleMoves(element)
+    function findPossibleMoves(x, y)
     {
-        let x = parseInt(element.getAttribute('x'));
-        let y = parseInt(element.getAttribute('y'));
 
         const directions = [
             [-1, 0], [0, -1], [0, 1], [1, 0]
@@ -119,7 +124,7 @@
                             nextSquare = document.querySelectorAll(`[x="${nextCoords[0]}"][y="${nextCoords[1]}"]`).item(0);
                             if (nextSquare){
                                 if (!(nextSquare.classList.contains('player1') || nextSquare.classList.contains('player2'))) {
-                                possibleMoves.push(nextSquare);
+                                jumpMoves.push(nextSquare);
                                 nextSquare.style.border = "solid #578A93";
                                 nextSquare.style.boxSizing = "border-box";
                             }
@@ -134,24 +139,47 @@
     }
     function endTurn()
     {
-        if(currentPlayer === 1)
+        if(currentPlayer === 'player1')
         {
-            currentPlayer = 2;
+            currentPlayer = 'player2';
             currentPlayerMarker.style.backgroundColor = '#45F0DF';
         }
         else
         {
-            currentPlayer = 1;
+            currentPlayer = 'player1';
             currentPlayerMarker.style.backgroundColor = '#F7ACCF';
         }
     }
     function holeClicked(element)
     {
-        if((currentPlayer === 1 && element.classList.contains('player1')) || (currentPlayer === 2 && element.classList.contains('player2')))
+        let x = parseInt(element.getAttribute('x'));
+        let y = parseInt(element.getAttribute('y'));
+
+        if(element.classList.contains(currentPlayer))
         {
             highlightHole(element);
             clearHighlightedMoves();
-            findPossibleMoves(element);
+            findPossibleMoves(x, y);
+            previousElement = element;
+        }
+        if (Array.from(possibleMoves).includes(element)) {
+            element.classList.add(currentPlayer);
+            if(previousElement) previousElement.classList.remove(currentPlayer);
+            endTurn();
+            highlightHole(element);
+            clearHighlightedMoves();
+        }
+        if (Array.from(jumpMoves).includes(element)) {
+            element.classList.add(currentPlayer);
+            if(previousElement)
+            {
+                previousElement.classList.remove(currentPlayer);
+            }
+            highlightHole(element);
+            clearHighlightedMoves();
+            findPossibleMoves(x, y);
+            previousElement = element;
+
         }
     }
 </script>
