@@ -37,8 +37,9 @@
     let divsShifted = false;
     let selectedElement = null;
     let previousElement = null;
-    let possibleMoves = [];
-    let jumpMoves = [];
+    let movingElement = null;
+    let possibleSteps = [];
+    let possibleJumps = [];
     let currentPlayer = 'player1';
     shiftDivs();
     magicButton.addEventListener('click', shiftDivs);
@@ -70,19 +71,35 @@
         selectedElement.style.border = "solid white";
         selectedElement.style.boxSizing = "border-box"
         }
-    function clearHighlightedMoves()
+    function clearHighlightedSteps()
     {
-        possibleMoves.forEach(function (div) {
+        possibleSteps.forEach(function (div) {
                 div.style.border = '';
                 div.style.boxSizing = '';
             })
-        possibleMoves = [];
-        jumpMoves.forEach(function (div) {
-                div.style.border = '';
-                div.style.boxSizing = '';
-            })
-        jumpMoves = [];
+        possibleSteps = [];
     }
+    function clearHighlightedJumps()
+    {
+        possibleJumps.forEach(function (div) {
+                div.style.border = '';
+                div.style.boxSizing = '';
+            })
+        possibleJumps = [];
+    }
+    function highlightSteps(){
+        possibleSteps.forEach(function (div) {
+            div.style.border = "solid #578A93";
+            div.style.boxSizing = "border-box"
+            })
+    }
+    function highlightJumps(){
+        possibleJumps.forEach(function (div) {
+            div.style.border = "solid #578A93";
+            div.style.boxSizing = "border-box"
+            })
+    }
+
     function findPossibleMoves(x, y)
     {
 
@@ -105,9 +122,7 @@
 
             if (searchedSquare) {
                 if (!(searchedSquare.classList.contains('player1') || searchedSquare.classList.contains('player2'))) {
-                    possibleMoves.push(searchedSquare);
-                    searchedSquare.style.border = "solid #578A93";
-                    searchedSquare.style.boxSizing = "border-box"
+                    possibleSteps.push(searchedSquare);
                 }
                 else {
                     let nextCoords = [x - (2 * direction[0]), y - (2 * direction[1])];
@@ -124,9 +139,7 @@
                             nextSquare = document.querySelectorAll(`[x="${nextCoords[0]}"][y="${nextCoords[1]}"]`).item(0);
                             if (nextSquare){
                                 if (!(nextSquare.classList.contains('player1') || nextSquare.classList.contains('player2'))) {
-                                jumpMoves.push(nextSquare);
-                                nextSquare.style.border = "solid #578A93";
-                                nextSquare.style.boxSizing = "border-box";
+                                possibleJumps.push(nextSquare);
                             }
                         }
                     }
@@ -139,6 +152,8 @@
     }
     function endTurn()
     {
+        movingElement = null;
+        previousElement = null;
         if(currentPlayer === 'player1')
         {
             currentPlayer = 'player2';
@@ -149,35 +164,40 @@
             currentPlayer = 'player1';
             currentPlayerMarker.style.backgroundColor = '#F7ACCF';
         }
+
     }
     function holeClicked(element)
     {
         let x = parseInt(element.getAttribute('x'));
         let y = parseInt(element.getAttribute('y'));
 
-        if(element.classList.contains(currentPlayer))
+
+        if(previousElement === movingElement && element.classList.contains(currentPlayer))
         {
             highlightHole(element);
-            clearHighlightedMoves();
+            clearHighlightedSteps();
+            clearHighlightedJumps();
             findPossibleMoves(x, y);
+            highlightSteps();
+            highlightJumps();
             previousElement = element;
+            movingElement = element;
         }
-        if (Array.from(possibleMoves).includes(element)) {
+        if (Array.from(possibleSteps).includes(element)) {
             element.classList.add(currentPlayer);
             if(previousElement) previousElement.classList.remove(currentPlayer);
+            highlightHole(element);
             endTurn();
-            highlightHole(element);
-            clearHighlightedMoves();
+            clearHighlightedSteps();
+            clearHighlightedJumps();
         }
-        if (Array.from(jumpMoves).includes(element)) {
+        if (Array.from(possibleJumps).includes(element)) {
             element.classList.add(currentPlayer);
-            if(previousElement)
-            {
-                previousElement.classList.remove(currentPlayer);
-            }
+            if(previousElement) previousElement.classList.remove(currentPlayer);
             highlightHole(element);
-            clearHighlightedMoves();
             findPossibleMoves(x, y);
+            clearHighlightedSteps();
+            highlightJumps();
             previousElement = element;
 
         }

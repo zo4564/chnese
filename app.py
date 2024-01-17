@@ -29,7 +29,7 @@ def home():
         [-1, -1, -1, -1, -1, 1, -1, -1, -1, -1, -1],
         [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1]
     ]
-    board = randomizeBoard(board)
+    #board = randomizeBoard(board)
     return render_template('chinese_checkers.html', board=board)
 
 
