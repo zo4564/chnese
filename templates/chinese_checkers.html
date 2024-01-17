@@ -152,6 +152,8 @@
     }
     function endTurn()
     {
+        clearHighlightedSteps();
+        clearHighlightedJumps();
         movingElement = null;
         previousElement = null;
         if(currentPlayer === 'player1')
@@ -164,6 +166,10 @@
             currentPlayer = 'player1';
             currentPlayerMarker.style.backgroundColor = '#F7ACCF';
         }
+        if (selectedElement) {
+            selectedElement.style.border = '';
+            selectedElement.style.boxSizing = '';
+            }
 
     }
     function holeClicked(element)
