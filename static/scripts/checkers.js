@@ -10,7 +10,14 @@ let movingElement = null;
 let possibleSteps = [];
 let possibleJumps = [];
 let currentPlayer = 'player1';
+const move = {
+    "moveFrom": [],
+    "moveTo": [],
+    "player": currentPlayer
+}
 shiftDivs();
+let boardDataElement = document.getElementById("board-data");
+boardData = JSON.parse(boardDataElement.dataset.board);
 magicButton.addEventListener('click', shiftDivs);
 endTurnButton.addEventListener('click', endTurn);
 function shiftDivs() {
@@ -39,6 +46,10 @@ function highlightHole(element)
     selectedElement = element;
     selectedElement.style.border = "solid white";
     selectedElement.style.boxSizing = "border-box"
+    if (previousElement) {
+        previousElement.style.border = '';
+        previousElement.style.boxSizing = '';
+        }
     }
 function clearHighlightedSteps()
 {
@@ -85,7 +96,7 @@ function findPossibleMoves(x, y)
     }
 
     directions.forEach(function (direction) {
-
+            console.log("check direction: " + direction);
         const searchedCoords = [x - direction[0], y - direction[1]];
         const searchedSquare = document.querySelectorAll(`[x="${searchedCoords[0]}"][y="${searchedCoords[1]}"]`).item(0);
 
@@ -109,6 +120,7 @@ function findPossibleMoves(x, y)
                         if (nextSquare){
                             if (!(nextSquare.classList.contains('player1') || nextSquare.classList.contains('player2'))) {
                             possibleJumps.push(nextSquare);
+                            console.log("added jump: " + nextCoords[0] + ", " + nextCoords[1]+ "from dir: "+2 * direction[0] + ", "+2 * direction[1]);
                         }
                     }
                 }
@@ -141,34 +153,29 @@ function endTurn()
         }
 
 }
-function holeClicked(element)
-{
+function holeClicked(element) {
     let x = parseInt(element.getAttribute('x'));
     let y = parseInt(element.getAttribute('y'));
 
 
-    if(previousElement === movingElement && element.classList.contains(currentPlayer))
-    {
+    if (!movingElement && element.classList.contains(currentPlayer)) {
         highlightHole(element);
         clearHighlightedSteps();
         clearHighlightedJumps();
         findPossibleMoves(x, y);
         highlightSteps();
         highlightJumps();
-        previousElement = element;
         movingElement = element;
-    }
-    if (Array.from(possibleSteps).includes(element)) {
-        element.classList.add(currentPlayer);
-        if(previousElement) previousElement.classList.remove(currentPlayer);
-        highlightHole(element);
+        previousElement = element;
+    } else if (Array.from(possibleSteps).includes(element)) {
+        saveMove(element);
+        movePiece(element);
         endTurn();
-        clearHighlightedSteps();
-        clearHighlightedJumps();
-    }
-    if (Array.from(possibleJumps).includes(element)) {
-        element.classList.add(currentPlayer);
-        if(previousElement) previousElement.classList.remove(currentPlayer);
+        sendData(move);
+    } else if (Array.from(possibleJumps).includes(element)) {
+        saveMove(element);
+        sendData(move);
+        movePiece(element);
         highlightHole(element);
         findPossibleMoves(x, y);
         clearHighlightedSteps();
@@ -177,3 +184,49 @@ function holeClicked(element)
 
     }
 }
+    function movePiece(element) {
+    element.classList.add(currentPlayer);
+    if (previousElement) previousElement.classList.remove(currentPlayer);
+    highlightHole(element);
+    clearHighlightedSteps();
+    clearHighlightedJumps();
+}
+function saveMove(element)
+{
+    selectedElement = element;
+    move.player = currentPlayer;
+    if(previousElement && selectedElement)
+    {
+        move.moveTo[0] = parseInt(selectedElement.getAttribute('x'));
+        move.moveTo[1] = parseInt(selectedElement.getAttribute('y'));
+        move.moveFrom[0] = parseInt(previousElement.getAttribute('x'));
+        move.moveFrom[1] = parseInt(previousElement.getAttribute('y'));
+        console.log(move.moveTo[0])
+        console.log(move.moveTo[1])
+        console.log(move.moveFrom[0])
+        console.log(move.moveFrom[1])
+    }
+    else console.log("move doesn't exist");
+
+}
+function sendData(move){
+
+    fetch('/update_board', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(move)
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log(data);
+        // You can perform additional actions or handle the response if needed
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+
+}
+
+

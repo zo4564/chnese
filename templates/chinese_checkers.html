@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Chinese Checkers</title>
+    <title>Game | Chinese Checkers</title>
      <link rel="stylesheet" href="static/style.css">
 </head>
 <body>
@@ -28,5 +28,6 @@
 
 
 </body>
+<div id="board-data" data-board="{{ board | tojson | safe }}"></div>
  <script src="static/scripts/checkers.js"></script>
 </html>
