@@ -72,7 +72,8 @@ def makeMove(board, player, moveFrom, moveTo):
     fromY = moveFrom[0]
     if board[toX][toY] == 0:
         possibleMoves= getPossibleMoves(board, fromX, fromY)
-        if moveTo in possibleMoves[0] or moveTo in possibleMoves[1]: #tu sie jebie
+        print(moveTo)
+        if tuple(moveTo) in possibleMoves[0] or tuple(moveTo) in possibleMoves[1]:
             if player == "player1" and board[fromX][fromY] == 1:
                 board[fromX][fromY] = 0
                 board[toX][toY] = 1
