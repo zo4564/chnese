@@ -3,9 +3,10 @@ import random
 
 app = Flask(__name__)
 
+
 board = [
         [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
-        [-1, -1, -1, -1, -1, 0, -1, -1, -1, -1, -1],
+        [-1, -1, -1, -1, -1, 2, -1, -1, -1, -1, -1],
         [-1, -1, -1, -1, 2, 2, -1, -1, -1, -1, -1],
         [-1, -1, -1, -1, 2, 2, 2, -1, -1, -1, -1],
         [-1, -1, -1, 2, 2, 2, 2, -1, -1, -1, -1],
@@ -50,6 +51,19 @@ def randomizeBoard(board):
                 board[i][j] = random.randint(0, 2)
     return board
 
+def print_board(board):
+    for row in board:
+        for cell in row:
+            if cell == -1:
+                print(" ", end=" ")
+            elif cell == 0:
+                print("O", end=" ")
+            elif cell == 1:
+                print("1", end=" ")
+            elif cell == 2:
+                print("2", end=" ")
+        print()
+
 
 @app.route('/update_board', methods=['POST'])
 def update_board():
@@ -60,6 +74,8 @@ def update_board():
     moveFrom = data['moveFrom']
 
     makeMove(board, player, moveFrom, moveTo)
+    print_board(board)
+    print(countMarbles(board))
     response = {'message': "data send"}
     return jsonify(response)
 
@@ -71,8 +87,7 @@ def makeMove(board, player, moveFrom, moveTo):
     fromX = moveFrom[1]
     fromY = moveFrom[0]
     if board[toX][toY] == 0:
-        possibleMoves= getPossibleMoves(board, fromX, fromY)
-        print(moveTo)
+        possibleMoves = getPossibleMoves(board, fromX, fromY)
         if tuple(moveTo) in possibleMoves[0] or tuple(moveTo) in possibleMoves[1]:
             if player == "player1" and board[fromX][fromY] == 1:
                 board[fromX][fromY] = 0
@@ -85,6 +100,20 @@ def makeMove(board, player, moveFrom, moveTo):
     else:
         print("invalid move")
         assert False
+
+def countMarbles(board):
+    ones = 0
+    twos = 0
+    for i in range(len(board)):
+        for j in range(len(board[i])):
+            if board[i][j] == -1 or (7 < j < 11):
+                continue
+            if board[i][j] == 1:
+                ones += 1
+            if board[i][j] == 2:
+                twos += 1
+    return ones, twos
+
 
 def getPossibleMoves(board, x, y):
 
