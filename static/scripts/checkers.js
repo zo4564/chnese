@@ -19,6 +19,11 @@ shiftDivs();
 let boardDataElement = document.getElementById("board-data");
 boardData = JSON.parse(boardDataElement.dataset.board);
 magicButton.addEventListener('click', shiftDivs);
+document.addEventListener('keyup', (e) => {
+    if (e.key === 's')
+        shiftDivs();
+})
+
 endTurnButton.addEventListener('click', endTurn);
 function shiftDivs() {
         if (!divsShifted) {
